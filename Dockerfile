@@ -2,7 +2,7 @@
 ## Copyright 2023 Ocean Protocol Foundation
 ## SPDX-License-Identifier: Apache-2.0
 ##
-FROM python:3.8-slim-buster
+FROM python:3.9-slim-bullseye
 LABEL maintainer="Ocean Protocol <devops@oceanprotocol.com>"
 
 ARG VERSION
@@ -11,14 +11,13 @@ RUN apt-get update && \
     build-essential \
     gcc \
     gettext-base && \
-    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 COPY . /aquarius
 WORKDIR /aquarius
 
-RUN python3.8 -m pip install --no-cache-dir setuptools wheel && \
-    python3.8 -m pip install --no-cache-dir .
+RUN python -m pip install --no-cache-dir setuptools wheel && \
+    python -m pip install --no-cache-dir .
 
 ENV DB_MODULE='elasticsearch'
 ENV DB_HOSTNAME='localhost'
