@@ -16,8 +16,10 @@ RUN apt-get update && \
 COPY . /aquarius
 WORKDIR /aquarius
 
-RUN python -m pip install --no-cache-dir setuptools wheel && \
-    python -m pip install --no-cache-dir .
+RUN python -m pip install --no-cache-dir --upgrade pip && \
+    python -m pip install --no-cache-dir wheel && \
+    python -m pip install --no-cache-dir . && \
+    python -m pip install --no-cache-dir "setuptools<70.0.0"
 
 ENV DB_MODULE='elasticsearch'
 ENV DB_HOSTNAME='localhost'
