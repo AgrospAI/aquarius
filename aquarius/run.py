@@ -5,9 +5,9 @@
 """
 This module is the entrypoint for statring the Aquarius component.
 """
+
 import click
 
-from elasticsearch import Elasticsearch
 from flask import jsonify, request
 from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -111,12 +111,7 @@ def force_set_block(chain_id, block_number):
 
 
 def get_status():
-    db_url = (
-        os.getenv("DB_HOSTNAME", "https://localhost")
-        + ":"
-        + os.getenv("DB_PORT", "9200")
-    )
-    if Elasticsearch(db_url).ping():
+    if es_instance.es.ping():
         return "Elasticsearch connected", 200
     else:
         return "Not connected to any database", 400
