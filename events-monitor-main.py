@@ -6,7 +6,6 @@ import http.server
 import logging
 import os
 import socketserver
-import time
 
 from aquarius.events.events_monitor import EventsMonitor
 from aquarius.events.util import setup_web3
@@ -43,8 +42,7 @@ def run_events_monitor():
         httpd = socketserver.TCPServer(("", 5001), Handler)
         httpd.serve_forever()
     else:
-        while True:
-            time.sleep(5)
+        monitor.wait_threads()
 
 
 if __name__ == "__main__":
