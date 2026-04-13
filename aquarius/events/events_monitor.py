@@ -114,6 +114,8 @@ class EventsMonitor(BlockProcessingClass):
 
         self._threads: dict[str, Thread] = {}
 
+        self._process_until = int(os.getenv("PROCESS_UNTIL_BLOCK", "0"))
+
     @property
     def block_envvar(self):
         return "METADATA_CONTRACT_BLOCK"
@@ -217,6 +219,20 @@ class EventsMonitor(BlockProcessingClass):
         """Process all blocks from the last processed block to the current block."""
 
         last_block = self.get_last_processed_block()
+
+        if (
+            last_block
+            and self._process_until != 0
+            and last_block >= int(self._process_until)
+        ):
+            logger.info(
+                "Stopping event monitor, reached process until block %d",
+                self._process_until,
+            )
+
+            self.stop_monitor()
+            return
+
         current_block = None
         try:
             current_block = self._web3.eth.block_number
