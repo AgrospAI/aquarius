@@ -113,8 +113,8 @@ class EventsMonitor(BlockProcessingClass):
         logger.info("Purgatory %s", "enabled" if self.purgatory else "disabled")
 
         self._threads: dict[str, Thread] = {}
-
         self._process_until = int(os.getenv("PROCESS_UNTIL_BLOCK", "0"))
+        logger.info("Scanning until block %d", self._process_until)
 
     @property
     def block_envvar(self):
