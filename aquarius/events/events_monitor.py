@@ -219,20 +219,6 @@ class EventsMonitor(BlockProcessingClass):
         """Process all blocks from the last processed block to the current block."""
 
         last_block = self.get_last_processed_block()
-
-        if (
-            last_block
-            and self._process_until != 0
-            and last_block >= int(self._process_until)
-        ):
-            logger.info(
-                "Stopping event monitor, reached process until block %d",
-                self._process_until,
-            )
-
-            self.stop_monitor()
-            return
-
         current_block = None
         try:
             current_block = self._web3.eth.block_number
@@ -262,10 +248,21 @@ class EventsMonitor(BlockProcessingClass):
         # if we only have one step, it will be processed at line #228 anyway
         if len(steps) > 1:
             for end_block_chunk in steps:
+                if start_block_chunk >= self._process_until:
+                    break
                 self.process_block_range(start_block_chunk, end_block_chunk)
                 start_block_chunk = end_block_chunk
         else:
             end_block_chunk = start_block_chunk
+
+        if start_block_chunk >= self._process_until:
+            logger.info(
+                "Stopping event monitor, reached process until block %d",
+                self._process_until,
+            )
+
+            self.stop_monitor()
+            return
         self.process_block_range(end_block_chunk, current_block)
 
     def process_block_range(self, from_block, to_block):
