@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import time
+from typing import Union
 from distutils.util import strtobool
 from threading import Event, Thread
 
@@ -218,7 +219,7 @@ class EventsMonitor(BlockProcessingClass):
     def process_current_blocks(self):
         """Process all blocks from the last processed block to the current block."""
 
-        def get_current_block() -> int | None:
+        def get_current_block() -> Union[int, None]:
             try:
                 current_block = self._web3.eth.block_number
                 if not isinstance(current_block, int):
