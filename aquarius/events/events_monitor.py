@@ -218,18 +218,19 @@ class EventsMonitor(BlockProcessingClass):
     def process_current_blocks(self):
         """Process all blocks from the last processed block to the current block."""
 
+        def get_current_block() -> int | None:
+            try:
+                current_block = self._web3.eth.block_number
+                if not isinstance(current_block, int):
+                    return
+
+                return current_block
+            except (KeyError, Exception) as e:
+                logger.error("Failed to get web3.eth.block_number %s.", e)
+
         last_block = self.get_last_processed_block()
-        current_block = None
-        try:
-            current_block = self._web3.eth.block_number
-        except (KeyError, Exception) as e:
-            logger.error("Failed to get web3.eth.block_number %s.", e)
-            return
-        if (
-            not current_block
-            or not isinstance(current_block, int)
-            or current_block <= last_block
-        ):
+        current_block = get_current_block()
+        if current_block <= last_block:
             return
 
         # we don't need to process last block again, it's a waste of rpc
@@ -245,7 +246,7 @@ class EventsMonitor(BlockProcessingClass):
             return
         start_block_chunk = from_block
         steps = range(from_block, current_block, self.blockchain_chunk_size)
-        # if we only have one step, it will be processed at line #228 anyway
+        # if we only have one step, it will be processed anyway
         if len(steps) > 1:
             for end_block_chunk in steps:
                 if start_block_chunk >= self._process_until:
@@ -496,7 +497,7 @@ class EventsMonitor(BlockProcessingClass):
                 index=self._other_db_index,
                 id=self._index_name,
                 body=record,
-                refresh="wait_for",
+                refresh=True,
             )["_id"]
 
         except elasticsearch.exceptions.RequestError:
