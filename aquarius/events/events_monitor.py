@@ -6,9 +6,9 @@ import json
 import logging
 import os
 import time
-from typing import Union
 from distutils.util import strtobool
 from threading import Event, Thread
+from typing import Union
 
 import elasticsearch
 from web3.logs import DISCARD
@@ -248,16 +248,21 @@ class EventsMonitor(BlockProcessingClass):
         start_block_chunk = from_block
         steps = range(from_block, current_block, self.blockchain_chunk_size)
         # if we only have one step, it will be processed anyway
+
+        should_stop = (
+            self._process_until != 0 and start_block_chunk >= self._process_until
+        )
+
         if len(steps) > 1:
             for end_block_chunk in steps:
-                if start_block_chunk >= self._process_until:
+                if should_stop:
                     break
                 self.process_block_range(start_block_chunk, end_block_chunk)
                 start_block_chunk = end_block_chunk
         else:
             end_block_chunk = start_block_chunk
 
-        if start_block_chunk >= self._process_until:
+        if should_stop:
             logger.info(
                 "Stopping event monitor, reached process until block %d",
                 self._process_until,
